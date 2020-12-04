@@ -1,7 +1,8 @@
+# CS021
+# James Castner
+
 import pygame # Imports pygame and all its methods, attributes and classes
 from pygame.locals import * # Imports key constants to decode key press events (really just makes less to type... pygame.KEYDOWN vs KEYDOWN)
-import time
-import random
 import Solitaire
 import Blackjack
 import GinRummy
@@ -146,31 +147,12 @@ def game_loop():
                 # Update the screen
                 pygame.display.update()
         elif user_game == 1:
-            for event in pygame.event.get():  # loops through the events gathered by pygame
-                if event.type == pygame.QUIT or event.type == KEYUP:  # Escape key to quit, mostly to speed up testing/development
-                    # If the window is closed, shutdown all of pygame and don't run the next function
-                    # which is what would happen if display_main_menu was set to true
-                    if event.key is K_ESCAPE:
-                        pygame.quit()
-                        quit()
             Solitaire.run(game_display)
         elif user_game == 2:
-            for event in pygame.event.get():  # loops through the events gathered by pygame
-                if event.type == pygame.QUIT or event.type == KEYUP:  # Escape key to quit, mostly to speed up testing/development
-                    # If the window is closed, shutdown all of pygame and don't run the next function
-                    # which is what would happen if display_main_menu was set to true
-                    if event.key is K_ESCAPE:
-                        pygame.quit()
-                        quit()
+            pygame.quit()
             Blackjack.main()
-            for event in pygame.event.get():  # loops through the events gathered by pygame
-                if event.type == pygame.QUIT or event.type == KEYUP:  # Escape key to quit, mostly to speed up testing/development
-                    # If the window is closed, shutdown all of pygame and don't run the next function
-                    # which is what would happen if display_main_menu was set to true
-                    if event.key is K_ESCAPE:
-                        pygame.quit()
-                        quit()
         elif user_game == 3:
+            pygame.quit()
             GinRummy.main()
 
 def main():

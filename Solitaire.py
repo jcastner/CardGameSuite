@@ -1,3 +1,6 @@
+# CS021
+# James Castner
+
 import random
 import pygame
 from pygame.locals import *
@@ -85,13 +88,13 @@ def shuffle_deck(deck):
 def create_board():
     # Create 7 different piles, plus 4 for the different final sorting piles
     board = {  # easiest to represent the board with a dictionary
-        "pile1": [], # add another array to show which cards are face up and which are not
-        "pile2": [],
-        "pile3": [],
-        "pile4": [],
-        "pile5": [],
-        "pile6": [],
-        "pile7": [],
+        "pile1": [[], []], # add another array to show which cards are face up and which are not
+        "pile2": [[], []],
+        "pile3": [[], []],
+        "pile4": [[], []],
+        "pile5": [[], []],
+        "pile6": [[], []],
+        "pile7": [[], []],
         "pileH": [],
         "pileD": [],
         "pileS": [],
@@ -107,7 +110,10 @@ def populate_board(deck, board):
     for pile in board:
         if pile[-1].isdigit():
             for i in range(int(pile[-1])): # Depending on the pile #, set a different amount to distribute
-                board[pile].append(deck.pop(0)) # Always popping the first index because you are always drawing from the top of the deck
+                if i == (int(pile[-1])-1):
+                    board[pile][0].append(deck.pop(0)) # Always popping the first index because you are always drawing from the top of the deck
+                else:
+                    board[pile][1].append(deck.pop(0)) # Only set the last card to visible
         elif pile == 'pileE':
             for card in deck: # Add the remaining cards to the deck
                 board[pile].append(card)
@@ -143,17 +149,17 @@ def draw_pile(pile_num, pile, display): # Pile number will signfy where we have 
         pile_x = (CARD_WIDTH * (pile_num-1)) + (25 * pile_num)
         pile_y = 250  # Will change based on the current card (increase by 25)
 
-        if len(pile) > 0:
-            card_count = 0
-            for card in pile:
-                if card_count != (len(pile) - 1): # If the last card in the pile, display it
-                    card_image = create_card_image('green_back')
-                    display.blit(card_image, (pile_x, pile_y))
-                else:
-                    card_image = create_card_image(card)
-                    display.blit(card_image, (pile_x, pile_y))
-                card_count += 1
+        if len(pile[0]) + len(pile[1]) > 0:
+            for i in range(len(pile[1])): # display all the cards in the first list with green backs and all the cards in the second list showing the cards
+                card_image = create_card_image('green_back')
+                display.blit(card_image, (pile_x, pile_y))
                 pile_y += 25
+
+            for card in pile[0]:
+                card_image = create_card_image(card)
+                display.blit(card_image, (pile_x, pile_y))
+                pile_y += 25
+
         else:
             # draw a transparent rectangle where the pile would be
             pile_rect = pygame.Surface((CARD_WIDTH, CARD_HEIGHT))
@@ -235,7 +241,12 @@ def deck_clicked(board):
 
     return new_board
 
-#def card_clicked(mouse_location, card_x, card_y):
+# def check_comp_cards(card1, card2):
+#     card1 = card1.split('-')
+#     card2 = card2.split('-')
+#
+#     if (card1[1] == 'H' and (card2[1] == 'S' or card2[1] == 'C')) or (card1[1] == 'D' and (card2[1] == 'S' or card2[1] == 'C')): # if card 1 is red and card 2 is black
+#         if card1[0].isdigit(): # Card1 must be greater than 2
 
 
 def run(display):
@@ -267,33 +278,98 @@ def run(display):
 
                 if card_clicked:
                     card_clicked = False
-                    board[original_pile].append(board['pileZ'].pop(0)) # This will have to change to accomdate piles with multiple cards
-                    original_pile = ''
 
-            elif event.type == MOUSEBUTTONDOWN:
-                # (CARD_WIDTH * (pile_num-1)) + (25 * pile_num)
+                    # Check if the location of which the card is being dropped is that of another pile
+                    if Rect(25, (250 + (25 * (len(board['pile1'][0]) - 1)) + + (25 * len(board['pile1'][1]))), CARD_WIDTH, CARD_HEIGHT + (25 * (len(board['pile1'][0]) - 1))).collidepoint(mouse_location):  # 1
+                        for i in range(len(board['pileZ'])):
+                            board['pile1'][0].append(board['pileZ'].pop(0)) # This will have to change to accommodate piles with multiple cards
+
+                        if len(board[original_pile][1]) > 0:
+                            board[original_pile][0].append(board[original_pile][1].pop(-1))
+                    elif Rect((CARD_WIDTH + (25 * 2)), (250 + (25 * (len(board['pile2'][0]) - 1)) + + (25 * len(board['pile2'][1]))), CARD_WIDTH,CARD_HEIGHT + (25 * (len(board['pile2'][0]) - 1))).collidepoint(mouse_location):  # 2
+                        for i in range(len(board['pileZ'])):
+                            board['pile2'][0].append(board['pileZ'].pop(0)) # This will have to change to accommodate piles with multiple cards
+
+                        if len(board[original_pile][1]) > 0:
+                            board[original_pile][0].append(board[original_pile][1].pop(-1))
+                    elif Rect(((CARD_WIDTH * 2) + (25 * 3)), (250 + (25 * (len(board['pile3'][0]) - 1)) + + (25 * len(board['pile3'][1]))), CARD_WIDTH,CARD_HEIGHT + (25 * (len(board['pile3'][0]) - 1))).collidepoint(mouse_location):  # 3
+                        for i in range(len(board['pileZ'])):
+                            board['pile3'][0].append(board['pileZ'].pop(0)) # This will have to change to accommodate piles with multiple cards
+
+                        if len(board[original_pile][1]) > 0:
+                            board[original_pile][0].append(board[original_pile][1].pop(-1))
+                    elif Rect(((CARD_WIDTH * 3) + (25 * 4)), (250 + (25 * (len(board['pile4'][0]) - 1)) + (25 * len(board['pile4'][1]))), CARD_WIDTH, CARD_HEIGHT + (25 * (len(board['pile4'][0]) - 1))).collidepoint(mouse_location):  # 4
+                        for i in range(len(board['pileZ'])):
+                            board['pile4'][0].append(board['pileZ'].pop(0)) # This will have to change to accommodate piles with multiple cards
+
+                        if len(board[original_pile][1]) > 0:
+                            board[original_pile][0].append(board[original_pile][1].pop(-1))
+                    elif Rect(((CARD_WIDTH * 4) + (25 * 5)), (250 + (25 * (len(board['pile5'][0]) - 1)) + (25 * len(board['pile5'][1]))), CARD_WIDTH, CARD_HEIGHT + (25 * (len(board['pile5'][0]) - 1))).collidepoint(mouse_location):  # 5
+                        for i in range(len(board['pileZ'])):
+                            board['pile5'][0].append(board['pileZ'].pop(0)) # This will have to change to accommodate piles with multiple cards
+
+                        if len(board[original_pile][1]) > 0:
+                            board[original_pile][0].append(board[original_pile][1].pop(-1))
+                    elif Rect(((CARD_WIDTH * 5) + (25 * 6)), (250 + (25 * (len(board['pile6'][0]) - 1)) + (25 * len(board['pile6'][1]))), CARD_WIDTH, CARD_HEIGHT + (25 * (len(board['pile6'][0]) - 1))).collidepoint(mouse_location):  # 6
+                        for i in range(len(board['pileZ'])):
+                            board['pile6'][0].append(board['pileZ'].pop(0)) # This will have to change to accommodate piles with multiple cards
+
+                        if len(board[original_pile][1]) > 0:
+                            board[original_pile][0].append(board[original_pile][1].pop(-1))
+                    elif Rect(((CARD_WIDTH * 6) + (25 * 7)), (250 + (25 * (len(board['pile7'][0]) - 1)) + (25 * len(board['pile7'][1]))), CARD_WIDTH, CARD_HEIGHT + (25 * (len(board['pile7'][0]) - 1))).collidepoint(mouse_location):  # 7
+                        for i in range(len(board['pileZ'])):
+                            board['pile7'][0].append(board['pileZ'].pop(0)) # This will have to change to accommodate piles with multiple cards
+
+                        if len(board[original_pile][1]) > 0:
+                            board[original_pile][0].append(board[original_pile][1].pop(-1))
+                    else:
+                        for i in range(len(board['pileZ'])):
+                            board[original_pile][0].append(board['pileZ'].pop(0)) # This will have to change to accommodate piles with multiple cards
+                    original_pile = ''
+            elif event.type == MOUSEBUTTONDOWN: # TODO: Clean up this nonsense using functions
                 mouse_location = pygame.mouse.get_pos()  # Get the current location
-                if Rect(25, 250, CARD_WIDTH, CARD_HEIGHT).collidepoint(mouse_location): #1
-                    if len(board['pile1']) > 0:
+                if Rect(25, (250 + (25 * (len(board['pile1'][0]) - 1)) + (25 * len(board['pile1'][1]))), CARD_WIDTH, CARD_HEIGHT + (25 * (len(board['pile1'][0])-1))).collidepoint(mouse_location): # 1
+                    if len(board['pile1'][0]) > 0:
                         card_clicked = True
                         original_pile = 'pile1'
-                        board['pileZ'].append(board['pile1'].pop(0))
-                elif Rect((CARD_WIDTH + (25 * 2)), 275, CARD_WIDTH, CARD_HEIGHT).collidepoint(mouse_location):  # 2
-                    print('Clicked 2')
-                elif Rect(((CARD_WIDTH * 2) + (25 * 3)), 300, CARD_WIDTH, CARD_HEIGHT).collidepoint(mouse_location):  # 3
-                    print('Clicked 3')
-                elif Rect(((CARD_WIDTH * 3) + (25 * 4)), 325, CARD_WIDTH, CARD_HEIGHT).collidepoint(mouse_location):  # 4
-                    print('Clicked 4')
-                elif Rect(((CARD_WIDTH * 4) + (25 * 5)), 350, CARD_WIDTH, CARD_HEIGHT).collidepoint(mouse_location):  # 5
-                    print('Clicked 5')
-                elif Rect(((CARD_WIDTH * 5) + (25 * 6)), 375, CARD_WIDTH, CARD_HEIGHT).collidepoint(mouse_location):  # 6
-                    print('Clicked 6')
-                elif Rect(((CARD_WIDTH * 6) + (25 * 7)), 400, CARD_WIDTH, CARD_HEIGHT).collidepoint(mouse_location):  # 7
-                    print('Clicked 7')
-            elif event.type == MOUSEMOTION:
-                if card_clicked:
-                    # Render pile z
-                    print('rendering z')
+                        for i in range(len(board['pile1'][0])):
+                            board['pileZ'].append(board['pile1'][0].pop(0))
+                elif Rect((CARD_WIDTH + (25 * 2)), (250 + (25 * (len(board['pile2'][0]) - 1)) + (25 * len(board['pile2'][1]))), CARD_WIDTH, CARD_HEIGHT + (25 * (len(board['pile2'][0])-1))).collidepoint(mouse_location):  # 2
+                    if len(board['pile2'][0]) > 0:
+                        card_clicked = True
+                        original_pile = 'pile2'
+                        for i in range(len(board['pile2'][0])):
+                            board['pileZ'].append(board['pile2'][0].pop(0))
+                elif Rect(((CARD_WIDTH * 2) + (25 * 3)), (250 + (25 * (len(board['pile3'][0]) - 1)) + (25 * len(board['pile3'][1]))), CARD_WIDTH, CARD_HEIGHT + (25 * (len(board['pile3'][0])-1))).collidepoint(mouse_location):  # 3
+                    if len(board['pile3'][0]) > 0:
+                        card_clicked = True
+                        original_pile = 'pile3'
+                        for i in range(len(board['pile3'][0])):
+                            board['pileZ'].append(board['pile3'][0].pop(0))
+                elif Rect(((CARD_WIDTH * 3) + (25 * 4)), (250 + (25 * (len(board['pile4'][0]) - 1)) + (25 * len(board['pile4'][1]))), CARD_WIDTH, CARD_HEIGHT + (25 * (len(board['pile4'][0])-1))).collidepoint(mouse_location):  # 4
+                    if len(board['pile4'][0]) > 0:
+                        card_clicked = True
+                        original_pile = 'pile4'
+                        for i in range(len(board['pile4'][0])):
+                            board['pileZ'].append(board['pile4'][0].pop(0))
+                elif Rect(((CARD_WIDTH * 4) + (25 * 5)), (250 + (25 * (len(board['pile5'][0]) - 1)) + (25 * len(board['pile5'][1]))), CARD_WIDTH, CARD_HEIGHT + (25 * (len(board['pile5'][0])-1))).collidepoint(mouse_location):  # 5
+                    if len(board['pile5'][0]) > 0:
+                        card_clicked = True
+                        original_pile = 'pile5'
+                        for i in range(len(board['pile5'][0])):
+                            board['pileZ'].append(board['pile5'][0].pop(0))
+                elif Rect(((CARD_WIDTH * 5) + (25 * 6)), (250 + (25 * (len(board['pile6'][0]) - 1)) + (25 * len(board['pile6'][1]))), CARD_WIDTH, CARD_HEIGHT + (25 * (len(board['pile6'][0])-1))).collidepoint(mouse_location):  # 6
+                    if len(board['pile6'][0]) > 0:
+                        card_clicked = True
+                        original_pile = 'pile6'
+                        for i in range(len(board['pile6'][0])):
+                            board['pileZ'].append(board['pile6'][0].pop(0))
+                elif Rect(((CARD_WIDTH * 6) + (25 * 7)), (250 + (25 * (len(board['pile7'][0]) - 1)) + (25 * len(board['pile7'][1]))), CARD_WIDTH, CARD_HEIGHT + (25 * (len(board['pile7'][0])-1))).collidepoint(mouse_location):  # 7
+                    if len(board['pile7'][0]) > 0:
+                        card_clicked = True
+                        original_pile = 'pile7'
+                        for i in range(len(board['pile7'][0])):
+                            board['pileZ'].append(board['pile7'][0].pop(0))
 
 
                 # If the location is within that of the deck pile
@@ -318,3 +394,4 @@ def run(display):
             render_pile_z(pygame.mouse.get_pos(), board['pileZ'], display)
 
         pygame.display.update()
+        print(board)
