@@ -114,8 +114,7 @@ def game_loop():
                         mouse_location = pygame.mouse.get_pos()  # Get the current location
 
                         # Check if the location of that click collided with any of the rectangles that were created above
-                        if Rect(sol_final_rect).collidepoint(
-                                mouse_location):  # Create a Rect object so that we can access the collidepoint() function
+                        if Rect(sol_final_rect).collidepoint(mouse_location):  # Create a Rect object so that we can access the collidepoint() function
                             display_main_menu = False  # Stops the loop from running, letting us move into the game loop
                             user_game = 1  # Sets the game the user wants to play, broken down by a unique number
                         elif Rect(bj_final_rect).collidepoint(mouse_location):
@@ -154,7 +153,7 @@ def game_loop():
                     if event.key is K_ESCAPE:
                         pygame.quit()
                         quit()
-            Solitaire.main()
+            Solitaire.run(game_display)
         elif user_game == 2:
             for event in pygame.event.get():  # loops through the events gathered by pygame
                 if event.type == pygame.QUIT or event.type == KEYUP:  # Escape key to quit, mostly to speed up testing/development
